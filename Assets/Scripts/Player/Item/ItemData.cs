@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Item Data", menuName = "ScriptableObject/Item Data", order =int.MaxValue)]
-public class ItempData : MonoBehaviour
+public class ItemData : ScriptableObject
 {
     [SerializeField]
     private new string name;
+    [SerializeField]
     private int data;
+
+
+
 }
