@@ -4,8 +4,13 @@ using UnityEngine;
 
 public class RoomBase : MonoBehaviour
 {
+    public Constant.RoomType roomType;
+
     public int width;
     public int height;
 
-    public Transform[] paths;
+    public Transform[] horizontalPaths;
+    public Transform[] verticalPaths;
+
+    public RoomBase leftRoom, rightRoom, topRoom, bottomRoom;
 }

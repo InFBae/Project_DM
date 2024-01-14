@@ -4,5 +4,5 @@ using UnityEngine;
 
 public static class Constant
 {
-    
+    public enum RoomType { Entrance, Exit, Normal, Shop, Teleport, Treasure};
 }
