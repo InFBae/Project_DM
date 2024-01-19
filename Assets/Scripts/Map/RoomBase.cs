@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class RoomBase : MonoBehaviour
@@ -9,8 +11,28 @@ public class RoomBase : MonoBehaviour
     public int width;
     public int height;
 
-    public Transform[] horizontalPaths;
-    public Transform[] verticalPaths;
+    public RoomPath[] paths;
+    public List<List<RoomPath>> dirPaths = new List<List<RoomPath>>();   
 
-    public RoomBase leftRoom, rightRoom, topRoom, bottomRoom;
+    public RoomBase beforeRoom;
+    public List<RoomBase> nextRooms = new List<RoomBase>();
+
+    private void Awake()
+    {
+        foreach (Constant.PathDir dir in Enum.GetValues(typeof(Constant.PathDir)))
+        {
+            dirPaths.Add(new List<RoomPath>());
+        }       
+
+        foreach(RoomPath path in paths)
+        {
+            foreach(Constant.PathDir dir in Enum.GetValues(typeof(Constant.PathDir)))
+            {
+                if (path.pathDir == dir)
+                {
+                    dirPaths[(int)dir].Add(path);
+                }
+            }
+        }
+    }
 }

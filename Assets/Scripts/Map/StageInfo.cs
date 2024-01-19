@@ -5,6 +5,7 @@ using UnityEngine;
 
 [Serializable]
 public class StageInfo
-{   
-    public List<List<string>> levelGraph; 
+{
+    public List<String> rooms;
+    public List<int[]> edges; 
 }
