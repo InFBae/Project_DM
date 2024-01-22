@@ -15,6 +15,7 @@ public class RoomBase : MonoBehaviour
     public List<List<RoomPath>> dirPaths = new List<List<RoomPath>>();   
 
     public RoomBase beforeRoom;
+    public RoomPath beforePath;
     public List<RoomBase> nextRooms = new List<RoomBase>();
 
     private void Awake()

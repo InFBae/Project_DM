@@ -276,7 +276,7 @@ SpriteShapeRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Color: {r: 0.26415092, g: 0.26415092, b: 0.26415092, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_MaskInteraction: 0
   m_ShapeTexture: {fileID: 2800000, guid: 8480fe75e60aef84bad1411eb36f8f37, type: 3}
   m_Sprites:
@@ -815,6 +815,7 @@ MonoBehaviour:
   paths:
   - {fileID: 1055747937531541791}
   beforeRoom: {fileID: 0}
+  beforePath: {fileID: 0}
   nextRooms: []
 --- !u!1 &7488470990489266901
 GameObject:
