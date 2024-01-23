@@ -15,8 +15,9 @@ public class RoomManager : MonoBehaviour
     public int stage;
     StageInfo stageInfo;
 
-    HashSet<Vector2> map = new HashSet<Vector2>();
+    HashSet<Vector2Int> map = new HashSet<Vector2Int>();
     Vector3 curPoint;
+    string errorCause;
 
     private void Start()
     {
@@ -49,7 +50,9 @@ public class RoomManager : MonoBehaviour
         // 노드 정보 추가
         for(int i = 0; i < stageInfo.rooms.Count; i++)
         {
-            roomDic.Add(i, Instantiate(Resources.Load<GameObject>($"Map/Room/{stageInfo.rooms[i]}"), mapContainer.transform).GetComponent<RoomBase>());                
+            roomDic.Add(i, Instantiate(Resources.Load<GameObject>($"Map/Room/{stageInfo.rooms[i]}"), mapContainer.transform).GetComponent<RoomBase>());
+            roomDic[i].gameObject.SetActive(false);
+            roomDic[i].gameObject.name = $"{roomDic[i].roomType}{i}";
         }
 
         // 간선 정보 추가
@@ -65,14 +68,10 @@ public class RoomManager : MonoBehaviour
         while ( roomStack.Count > 0 && count++ < 1000)
         {
             RoomBase currentRoom = roomStack.Pop();
+            curPoint = currentRoom.transform.position;
+            AddMap(currentRoom.width, currentRoom.height);
+            currentRoom.gameObject.SetActive(true);
 
-            for(int i = 0; i < currentRoom.width; i++)
-            {
-                for(int j = 0; j < currentRoom.height; j++)
-                {
-                    map.Add(new Vector2((int)curPoint.x + i, (int)curPoint.y - j));
-                }
-            }
             #region 다음 방 만들기
             // 연결된 방 만들기
             for (int i = 0; i < currentRoom.nextRooms.Count; i++)
@@ -121,6 +120,7 @@ public class RoomManager : MonoBehaviour
                             // 충돌확인 후 불가능하다면 경로 제거
                             if (CheckCollision(nextRoom.width, nextRoom.height))
                             {
+                                errorCause = $"{currentRoom.name}과 {nextRoom.name} 충돌";
                                 nextPath = null;
                             }
                             break;
@@ -129,11 +129,8 @@ public class RoomManager : MonoBehaviour
 
                     // 연결되는 길이 없다면 다시 남은 길 중에 랜덤으로 찾기
                     if (nextPath == null)
-                    {                      
-                        if (leftPathList.Count == 0)
-                        {
-                            backTrack = true;
-                        }
+                    {
+                        backTrack = true;
                         continue;
                     }                    
 
@@ -150,15 +147,14 @@ public class RoomManager : MonoBehaviour
                 // 만약 모든 경로가 불가능했을 때
                 if (backTrack)
                 {
-                    Debug.Log($"{nextRoom.roomType}Room Make Failed");
+                    Debug.Log(errorCause);
+                    Debug.Log($"{nextRoom.gameObject.name} Make Failed");
                     currentRoom.beforePath.backTracked = true;
-                    foreach (RoomPath path in currentRoom.paths)
-                    {
-                        path.backTracked = false;
-                    }
+
+                    BackTrackMap(currentRoom);
+                  
                     roomStack.Pop();
-                    roomStack.Push(currentRoom.beforeRoom);
-                    return;
+                    roomStack.Push(currentRoom.beforeRoom);                    
                     break;
                 }
 
@@ -170,13 +166,57 @@ public class RoomManager : MonoBehaviour
 
     }
 
+    private void BackTrackMap(RoomBase currentRoom)
+    {
+        if (currentRoom.nextRooms.Count > 0)
+        {
+            foreach (RoomBase room in currentRoom.nextRooms)
+            {
+                BackTrackMap(room);
+            }
+        }
+        foreach (RoomPath path in currentRoom.paths)
+        {
+            path.gameObject.SetActive(true);
+            path.isUsing = false;
+            path.backTracked = false;
+        }
+        currentRoom.gameObject.SetActive(false);
+
+        curPoint = currentRoom.transform.position;
+        RemoveMap(currentRoom.width, currentRoom.height);
+    }
+
+
+    private void AddMap(int width, int height)
+    {
+        for (int w = 0; w < width; w++)
+        {
+            for(int  h = 0; h < height; h++)
+            {
+                map.Add(new Vector2Int((int)curPoint.x + w, (int)curPoint.y + h));
+            }
+        }
+    }
+
+    private void RemoveMap(int width, int height)
+    {
+        for (int w = 0; w < width; w++)
+        {
+            for (int h = 0; h < height; h++)
+            {
+                map.Remove(new Vector2Int((int)curPoint.x + w, (int)curPoint.y + h));             
+            }
+        }
+    }
+
     private bool CheckCollision(int width, int height)
     {
-        for (int w = 5; w < width - 4; w++)
+        for (int w = 1; w < width - 1; w++)
         {
-            for (int h = 5; h < height - 4; h++)
+            for (int h = 1; h < height - 1; h++)
             {
-                if (map.Contains(new Vector2((int)curPoint.x + w, (int)curPoint.y - h)))
+                if (map.Contains(new Vector2Int((int)curPoint.x + w, (int)curPoint.y + h)))
                 {
                     return true;
                 }
@@ -184,5 +224,4 @@ public class RoomManager : MonoBehaviour
         }
         return false;
     }
-
 }

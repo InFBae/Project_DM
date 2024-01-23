@@ -1,32 +1,32 @@
 {
   "rooms": [
-    "Entrance",
-    "Teleport",
-    "Normal",
-    "Normal",
-    "Teleport",
-    "Shop",
-    "Teleport",
-    "Normal",
-    "Normal",
-    "Teleport",
-    "Normal",
-    "Normal",
-    "Teleport",
-    "Exit", // 0-13
-    "Normal",
-    "Normal",
-    "Teleport",
-    "Normal",
-    "Normal",
-    "Teleport",
-    "Exit", // 14-20
-    "Teleport",
-    "Treasure", // 21-22
-    "Normal",
-    "Normal",
-    "Teleport",
-    "Exit" // 23-26
+    "Entrance", // 0
+    "Teleport", // 1
+    "Normal", // 2
+    "Normal", // 3
+    "Teleport", // 4
+    "Shop", // 5
+    "Teleport", // 6
+    "Normal", // 7
+    "Normal", // 8
+    "Teleport", // 9
+    "Normal", // 10
+    "Normal", // 11
+    "Teleport", // 12
+    "Exit", // 13
+    "Normal", // 14
+    "Normal", // 15
+    "Teleport", // 16
+    "Normal", // 17
+    "Normal", // 18
+    "Teleport", // 19
+    "Exit", // 20
+    "Teleport", // 21
+    "Treasure", // 22
+    "Normal", // 23
+    "Normal", // 24
+    "Teleport", // 25
+    "Exit" // 26
   ],
   "edges": [
     [0, 1],
