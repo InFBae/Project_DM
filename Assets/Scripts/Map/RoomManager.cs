@@ -64,12 +64,12 @@ public class RoomManager : MonoBehaviour
 
         Stack<RoomBase> roomStack = new Stack<RoomBase>();
         roomStack.Push(roomDic[0]);
-        int count = 0;
-        while ( roomStack.Count > 0 && count++ < 1000)
+
+        while ( roomStack.Count > 0)
         {
             RoomBase currentRoom = roomStack.Pop();
             curPoint = currentRoom.transform.position;
-            AddMap(currentRoom.width, currentRoom.height);
+            AddMap(currentRoom.width, currentRoom.height, curPoint);
             currentRoom.gameObject.SetActive(true);
 
             #region 다음 방 만들기
@@ -118,7 +118,7 @@ public class RoomManager : MonoBehaviour
                             curPoint -= nextPath.transform.localPosition;
 
                             // 충돌확인 후 불가능하다면 경로 제거
-                            if (CheckCollision(nextRoom.width, nextRoom.height))
+                            if (CheckCollision(nextRoom.width, nextRoom.height, curPoint))
                             {
                                 errorCause = $"{currentRoom.name}과 {nextRoom.name} 충돌";
                                 nextPath = null;
@@ -133,6 +133,14 @@ public class RoomManager : MonoBehaviour
                         backTrack = true;
                         continue;
                     }                    
+
+                    // TODO : 방향에 맞춰서 수정필요
+                    for(int c = 0; c < needCorridorCount; c++)
+                    {
+                        GameObject corridor = Instantiate(Resources.Load<GameObject>("Map/HorizontalCorridor"), nextRoom.transform);
+                        corridor.transform.localPosition = nextPath.transform.localPosition + (Constant.dir[(int)nextPath.pathDir] * c * Constant.blockSize);                        
+                    }
+
 
                     backTrack = false;
                     currentPath.isUsing = true;
@@ -149,7 +157,11 @@ public class RoomManager : MonoBehaviour
                 {
                     Debug.Log(errorCause);
                     Debug.Log($"{nextRoom.gameObject.name} Make Failed");
+                    Debug.Log($"BackTrack to {currentRoom.beforeRoom.name}");
+
                     currentRoom.beforePath.backTracked = true;
+                    currentRoom.beforePath.isUsing = false;
+                    currentRoom.beforePath.gameObject.SetActive(true);
 
                     BackTrackMap(currentRoom);
                   
@@ -170,9 +182,9 @@ public class RoomManager : MonoBehaviour
     {
         if (currentRoom.nextRooms.Count > 0)
         {
-            foreach (RoomBase room in currentRoom.nextRooms)
+            foreach (RoomBase nextRoom in currentRoom.nextRooms)
             {
-                BackTrackMap(room);
+                BackTrackMap(nextRoom);
             }
         }
         foreach (RoomPath path in currentRoom.paths)
@@ -181,42 +193,42 @@ public class RoomManager : MonoBehaviour
             path.isUsing = false;
             path.backTracked = false;
         }
-        currentRoom.gameObject.SetActive(false);
+        currentRoom.gameObject.SetActive(false);       
 
         curPoint = currentRoom.transform.position;
-        RemoveMap(currentRoom.width, currentRoom.height);
+        RemoveMap(currentRoom.width, currentRoom.height, curPoint);
     }
 
 
-    private void AddMap(int width, int height)
+    private void AddMap(int width, int height, Vector3 startPoint)
     {
         for (int w = 0; w < width; w++)
         {
             for(int  h = 0; h < height; h++)
             {
-                map.Add(new Vector2Int((int)curPoint.x + w, (int)curPoint.y + h));
+                map.Add(new Vector2Int((int)startPoint.x + w, (int)startPoint.y + h));
             }
         }
     }
 
-    private void RemoveMap(int width, int height)
+    private void RemoveMap(int width, int height, Vector3 startPoint)
     {
         for (int w = 0; w < width; w++)
         {
             for (int h = 0; h < height; h++)
             {
-                map.Remove(new Vector2Int((int)curPoint.x + w, (int)curPoint.y + h));             
+                map.Remove(new Vector2Int((int)startPoint.x + w, (int)startPoint.y + h));             
             }
         }
     }
 
-    private bool CheckCollision(int width, int height)
+    private bool CheckCollision(int width, int height, Vector3 startPoint)
     {
         for (int w = 1; w < width - 1; w++)
         {
             for (int h = 1; h < height - 1; h++)
             {
-                if (map.Contains(new Vector2Int((int)curPoint.x + w, (int)curPoint.y + h)))
+                if (map.Contains(new Vector2Int((int)startPoint.x + w, (int)startPoint.y + h)))
                 {
                     return true;
                 }
