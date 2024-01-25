@@ -65,11 +65,11 @@ public class RoomManager : MonoBehaviour
         Stack<RoomBase> roomStack = new Stack<RoomBase>();
         roomStack.Push(roomDic[0]);
 
-        while ( roomStack.Count > 0)
+        int count = 0;
+        while (roomStack.Count > 0 && count++ < 1000)
         {
             RoomBase currentRoom = roomStack.Pop();
-            curPoint = currentRoom.transform.position;
-            AddMap(currentRoom.width, currentRoom.height, curPoint);
+            AddMap(currentRoom.width, currentRoom.height, currentRoom.transform.position);
             currentRoom.gameObject.SetActive(true);
 
             #region 다음 방 만들기
@@ -90,6 +90,12 @@ public class RoomManager : MonoBehaviour
                 }
 
                 bool backTrack = false;
+
+                if (leftPathList.Count == 0)
+                {
+                    errorCause = $"{currentRoom.name}의 남은 경로 없음";
+                    backTrack = true ;
+                }
 
                 // 방에 남아있는 길 중 랜덤으로 뽑아서 다음 방 옮기기
                 while (leftPathList.Count > 0)
@@ -120,7 +126,7 @@ public class RoomManager : MonoBehaviour
                             // 충돌확인 후 불가능하다면 경로 제거
                             if (CheckCollision(nextRoom.width, nextRoom.height, curPoint))
                             {
-                                errorCause = $"{currentRoom.name}과 {nextRoom.name} 충돌";
+                                errorCause = $"{nextRoom.name} 충돌";
                                 nextPath = null;
                             }
                             break;
@@ -134,13 +140,19 @@ public class RoomManager : MonoBehaviour
                         continue;
                     }                    
 
-                    // TODO : 방향에 맞춰서 수정필요
-                    for(int c = 0; c < needCorridorCount; c++)
+                    foreach(Constant.PathDir dir in Enum.GetValues(typeof(Constant.PathDir)))
                     {
-                        GameObject corridor = Instantiate(Resources.Load<GameObject>("Map/HorizontalCorridor"), nextRoom.transform);
-                        corridor.transform.localPosition = nextPath.transform.localPosition + (Constant.dir[(int)nextPath.pathDir] * c * Constant.blockSize);                        
+                        if (dir == nextPath.pathDir)
+                        {
+                            for (int c = 1; c <= needCorridorCount; c++)
+                            {
+                                GameObject corridor = Instantiate(Resources.Load<GameObject>("Map/HorizontalCorridor"), nextRoom.transform);
+                                nextRoom.corridors.Add(corridor);
+                                corridor.transform.localPosition = nextPath.transform.localPosition + (Constant.dir[(int)nextPath.pathDir] * c * Constant.blockSize);       
+                                corridor.transform.localScale = nextPath.transform.localScale;
+                            }
+                        }
                     }
-
 
                     backTrack = false;
                     currentPath.isUsing = true;
@@ -193,10 +205,15 @@ public class RoomManager : MonoBehaviour
             path.isUsing = false;
             path.backTracked = false;
         }
+        foreach(GameObject corridor in currentRoom.corridors)
+        {           
+            Destroy(corridor);
+        }
+        currentRoom.corridors.Clear();
+
         currentRoom.gameObject.SetActive(false);       
 
-        curPoint = currentRoom.transform.position;
-        RemoveMap(currentRoom.width, currentRoom.height, curPoint);
+        RemoveMap(currentRoom.width, currentRoom.height, currentRoom.transform.position);
     }
 
 
